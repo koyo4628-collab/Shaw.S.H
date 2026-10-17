@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>သူငယ်ချင်းကို ချစ်လား</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: #ffe6e6;
+      font-family: sans-serif;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .container {
+      position: relative;
+      z-index: 10;
+    }
+
+    h1 {
+      color: #ff3366;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .emoji {
+      font-size: 3rem;
+      margin-bottom: 20px;
+    }
+
+    p {
+      color: #666;
+      font-size: 1.2rem;
+    }
+
+    .buttons {
+      margin-top: 20px;
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    #yes {
+      background-color: #ff3366;
+      color: white;
+    }
+
+    #no {
+      background-color: #ccc;
+      color: #333;
+    }
+
+    /* အသဲပုံ animation */
+    .heart {
+      position: fixed;
+      top: -10vh;
+      z-index: 1;
+      user-select: none;
+      pointer-events: none;
+      animation: fall linear forwards;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(110vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- YouTube ကို Video လုံးဝမပေါ်ဘဲ သီချင်း (Audio) သက်သက် အလိုအလျောက်ဖွင့်ရန် (hidden iframe) -->
+  <iframe src="https://www.youtube.com/embed/_cM4C-6AY4s?autoplay=1&loop=1&playlist=_cM4C-6AY4s" 
+          allow="autoplay" 
+          style="display:none;" 
+          id="youtube-audio">
+  </iframe>
+
+  <div class="container">
+    <div class="emoji">🥺💖</div>
+    <h1 id="heading">သူငယ်ချင်းကို ချစ်လား?</h1>
+    <p id="message">တကယ်မေးနေတာနော်...</p>
+
+    <div class="buttons" id="buttons">
+      <button id="yes">ချစ်တယ် 🥰</button>
+      <button id="no">မချစ်ဘူး 😜</button>
+    </div>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const yes = document.getElementById("yes");
+    const no = document.getElementById("no");
+    const buttons = document.getElementById("buttons");
+    const result = document.getElementById("result");
+
+    let accepted = false;
+    let rainTimer = null;
+
+    // အသဲပုံလေးတွေ ဖန်တီးရန်
+    function makeHeart() {
+      const heart = document.createElement("div");
+      const symbols = ["💗", "💖", "💕", "❤️", "💘", "💝"];
+
+      heart.className = "heart";
+      heart.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+
+      heart.style.left = Math.random() * 100 + "vw";
+      heart.style.fontSize = (18 + Math.random() * 28) + "px";
+      heart.style.animationDuration = (3 + Math.random() * 3) + "s";
+
+      document.body.appendChild(heart);
+      setTimeout(() => heart.remove(), 6500);
+    }
+
+    // နောက်ခံ အသဲပုံလေးတွေ ကျနေစေရန်
+    setInterval(makeHeart, 650);
+
+    // "မချစ်ဘူး" ကို နှိပ်ရင် ဒါမှမဟုတ် ထိရင် ပြေးမယ့် ပုံစံ
+    function dodgeNo(e) {
+      if (accepted) return;
+      if (e) e.preventDefault();
+
+      const margin = 12;
+      const maxX = window.innerWidth - no.offsetWidth - margin;
+      const maxY = window.innerHeight - no.offsetHeight - margin;
+
+      no.style.position = "fixed";
+      no.style.zIndex = "100";
+      no.style.margin = "0";
+      no.style.left = Math.max(margin, Math.random() * maxX) + "px";
+      no.style.top = Math.max(margin, Math.random() * maxY) + "px";
+    }
+
+    no.addEventListener("touchstart", dodgeNo, { passive: false });
+    no.addEventListener("click", dodgeNo);
+
+    // "ချစ်တယ်" ကို နှိပ်လိုက်ရင်
+    yes.addEventListener("click", function() {
+      if (accepted) return;
+      accepted = true;
+
+      no.style.display = "none";
+      buttons.style.display = "none";
+
+      document.getElementById("heading").innerHTML = "သူငယ်ချင်းကို တကယ်ချစ်တာပေါ့နော်! 💖";
+      document.getElementById("message").textContent = "ဝမ်းသာလိုက်တာ သူငယ်ချင်းရေ 🥰💕";
+      document.querySelector(".emoji").textContent = "😍💞";
+
+      for (let i = 0; i < 100; i++) {
+        setTimeout(makeHeart, i * 40);
+      }
+
+      rainTimer = setInterval(makeHeart, 120);
+      setTimeout(() => clearInterval(rainTimer), 15000);
+    });
+
+    // ဖုန်းအရွယ်အစား ပြောင်းတဲ့အခါ ခလုတ်နေရာ လွဲမသွားအောင်
+    window.addEventListener("resize", function() {
+      if (no.style.position === "fixed" && !accepted) {
+        no.style.left = Math.max(
+          12,
+          Math.min(parseFloat(no.style.left) || 12, window.innerWidth - no.offsetWidth - 12)
+        ) + "px";
+
+        no.style.top = Math.max(
+          12,
+          Math.min(parseFloat(no.style.top) || 12, window.innerHeight - no.offsetHeight - 12)
+        ) + "px";
+      }
+    });
+  </script>
+</body>
+</html>
